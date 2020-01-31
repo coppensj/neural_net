@@ -1,0 +1,38 @@
+CXX := g++
+
+override INCLUDES = \
+	-I.
+
+override CXXFLAGS += \
+	$(INCLUDES) \
+	-O3 \
+	-std=c++17 \
+	-Wall \
+	-Wextra \
+	-fpermissive 
+
+override LDFLAGS += \
+	-lstdc++fs \
+	-lz \
+	-lm
+
+SOURCES := $(wildcard *.cpp) 
+OBJS := $(patsubst %.cpp,%.o,$(SOURCES))
+DEPS := $(patsubst %.cpp,%.d,$(SOURCES))
+
+.PHONY: all clean
+all: network_test
+
+clean:
+	@echo "Cleaning..."
+	$(RM) $(OBJS) $(DEPS) network_test
+
+# for executable
+network_test: $(OBJS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+-include $(DEPS)
+
+# generic rule
+%.o: %.cpp Makefile
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
