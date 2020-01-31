@@ -5,9 +5,9 @@
 
 int main(){
 
-    int layer_sizes[3] = {2, 3, 1};
+    int layer_sizes[4] = {2, 6, 4, 2};
 
-    Network net(layer_sizes, 3);
+    Network net(layer_sizes, 4);
 
     return 0;
 }
