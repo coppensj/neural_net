@@ -21,14 +21,15 @@ OBJS := $(patsubst %.cpp,%.o,$(SOURCES))
 DEPS := $(patsubst %.cpp,%.d,$(SOURCES))
 
 .PHONY: all clean
-all: network_test
+
+all: test_network
 
 clean:
 	@echo "Cleaning..."
-	$(RM) $(OBJS) $(DEPS) network_test
+	$(RM) $(OBJS) $(DEPS) test_network
 
 # for executable
-network_test: $(OBJS)
+test_network: $(OBJS) 
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 -include $(DEPS)
