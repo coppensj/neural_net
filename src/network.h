@@ -22,38 +22,24 @@ class Network {
             std::mt19937 generator(rd());
             std::normal_distribution<float> initial_value(0,1);
 
+            // Initialize biases
             biases.reserve(num_layers - 1);
             for(int i=0; i<num_layers-1; i++){
                 biases[i].reserve(sizes[i+1]);
                 for(int j=0; j<sizes[i+1]; j++)
                     biases[i][j] = initial_value(generator);
             }
-            
+           
+            // Initialize weights
             weights.reserve(num_layers - 1);
-            for(int i=1; i<num_layers; i++){
-                weights[i-1].reserve(sizes[i]);
-                
-                for(int row=0; row<sizes[i]; row++){    
-                    weights[i-1][row].reserve(sizes[i-1]);
-                    
-                    for(int col=0; col<sizes[i-1]; col++)
-                        weights[i-1][row][col] = initial_value(generator);
-                }
-            }
-            
             for(int i=0; i<num_layers-1; i++){
                 weights[i].reserve(sizes[i+1]);
                 
                 for(int row=0; row<sizes[i+1]; row++){    
                     weights[i][row].reserve(sizes[i]);
-                    
-                    for(int col=0; col<sizes[i]; col++){
+                    for(int col=0; col<sizes[i]; col++)
                         weights[i][row][col] = initial_value(generator);
-                        std::cout << weights[i][row][col] << " ";
-                    }
-                    std::cout << std::endl;
                 }
-                std::cout << std::endl;
             }
         
         }
