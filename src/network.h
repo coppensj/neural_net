@@ -4,7 +4,13 @@
 #define NETWORK
 
 #include <random>
+#include <cmath>
+
 #include <iostream>
+
+float sigmoid(float z){
+    return 1.0/(1.0 + exp(-z));
+}
 
 class Network {
     // Data
