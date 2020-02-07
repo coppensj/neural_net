@@ -5,6 +5,7 @@
 
 #include <random>
 #include <cmath>
+#include <Eigen/Core>
 
 #include <iostream>
 
@@ -33,6 +34,7 @@ class Network {
         int *sizes;
         std::vector<std::vector<float>> biases;
         std::vector<std::vector<std::vector<float>>> weights;
+        Eigen::Matrix<float, 3, 1> t;
 
     // Methods
     public: 
@@ -56,11 +58,16 @@ class Network {
             for(int i=0; i<num_layers-1; i++){
                 weights[i].resize(sizes[i+1]);
                 
+                std::cout << "weight " << i << "(" << sizes[i+1] << "," << sizes[i] << ")\n";
                 for(int row=0; row<sizes[i+1]; row++){    
                     weights[i][row].resize(sizes[i]);
-                    for(int col=0; col<sizes[i]; col++)
+                    for(int col=0; col<sizes[i]; col++){
                         weights[i][row][col] = initial_value(generator);
+                        std::cout << weights[i][row][col] << " "; //for testing
+                    }
+                    std::cout << std::endl; //for testing
                 }
+                std::cout << std::endl; //for testing
             }
             
             /* std::vector<float> test = sigmoid(biases[0]); */

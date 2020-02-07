@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+PREFIX=$(pwd)
+
+mkdir include
+mkdir lib
+
+echo "building eigen"
+git clone https://github.com/eigenteam/eigen-git-mirror
+
+exit 0

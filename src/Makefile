@@ -1,7 +1,12 @@
+override DEPPATH = ../dep
+override EIGENPATH = ../dep/eigen-git-mirror
+
 CXX := g++
 
 override INCLUDES = \
-	-I.
+	-I. \
+    -I$(EIGENPATH) \
+	-I$(DEPPATH)/include
 
 override CXXFLAGS += \
 	$(INCLUDES) \
@@ -12,6 +17,7 @@ override CXXFLAGS += \
 	-fpermissive 
 
 override LDFLAGS += \
+	-L$(DEPPATH)/lib \
 	-lstdc++fs \
 	-lz \
 	-lm
