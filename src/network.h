@@ -10,8 +10,19 @@
 
 std::vector<float> sigmoid(std::vector<float> &z){
     std::vector<float> z_new(z.size());
-    for(int i=0; i<z.size(); i++)
+    for(unsigned int i=0; i<z.size(); i++)
         z_new[i] = 1.0/(1.0 + exp(-z[i]));
+    return z_new;
+}
+
+std::vector<std::vector<float>> sigmoid(std::vector<std::vector<float>> &z){
+    std::vector<std::vector<float>> z_new(z.size());
+    for(unsigned int i=0; i<z.size(); i++){
+        z_new[i].resize(z[i].size());
+        for(unsigned int j=0; j<z[i].size(); j++){
+            z_new[i][j] = 1.0/(1.0 + exp(-z[i][j]));
+        }
+    }
     return z_new;
 }
 
@@ -52,9 +63,14 @@ class Network {
                 }
             }
             
-            std::vector<float> test = sigmoid(biases[0]);
-            for(int i=0; i<test.size(); i++)
-                std::cout << biases[0][i] << " " << test[i] << std::endl;
+            /* std::vector<float> test = sigmoid(biases[0]); */
+            /* for(unsigned int i=0; i<test.size(); i++) */
+            /*     std::cout << biases[0][i] << " " << test[i] << std::endl; */
+
+            /* std::vector<std::vector<float>> test2d = sigmoid(weights[0]); */
+            /* for(unsigned int i=0; i<test2d.size(); i++) */
+            /*     for(unsigned int j=0; j<test2d[i].size(); j++) */
+            /*         std::cout << i << " " << j << " " << weights[0][i][j] << " " << test2d[i][j] << std::endl; */
         }
 };
 
