@@ -9,14 +9,14 @@
 
 #include <iostream>
 
-Eigen::MatrixXf
-sigmoid(const Eigen::Ref<const Eigen::MatrixXf>& z){
+Eigen::MatrixXf sigmoid(const Eigen::Ref<const Eigen::MatrixXf>& z){
     Eigen::MatrixXf z_new = z;
     for(int col=0; col<z.cols(); col++)
         for(int row=0; row<z.rows(); row++)    
             z_new(row,col) = 1.0/(1.0 + exp(-z(row,col)));
     return z_new;
 }
+
 
 class Network {
     // Data
@@ -40,7 +40,6 @@ class Network {
                 biases[i].resize(sizes[i+1],1);
                 for(int j=0; j<sizes[i+1]; j++)
                     biases[i](j, 0) = initial_value(generator);
-                /* std::cout << "b["<< i << "]\n" << biases[i] << std::endl; //for testing */
             }
            
             // Initialize weights
@@ -50,18 +49,19 @@ class Network {
                 for(int col=0; col<sizes[i]; col++)
                     for(int row=0; row<sizes[i+1]; row++)    
                         weights[i](row,col) = initial_value(generator);
-                /* std::cout << "w["<< i << "]\n" << weights[i] << std::endl; //for testing */
             }
-              
-            Eigen::MatrixXf test;
-            std::cout << biases[0] << std::endl;
-            test = sigmoid(biases[0]);
-            std::cout << test << std::endl;
-            
-            std::cout <<std::endl;
-            std::cout << weights[0] << std::endl;
-            test = sigmoid(weights[0]);
-            std::cout << test << std::endl;
+
+            Eigen::MatrixXf a, test;
+            a.resize(2,1);
+            a << 1, 1;
+            test = feedforward(a);
+            std::cout << "test = \n" << test << std::endl;
+        }
+
+        Eigen::MatrixXf feedforward(Eigen::MatrixXf& a){
+            for(unsigned int i=0; i<biases.size(); i++)
+                a = sigmoid(weights[i] * a + biases[i]);
+            return a;
         }
 };
 
