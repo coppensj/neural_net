@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-Eigen::MatrixXf sigmoid(const Eigen::Ref<const Eigen::MatrixXf>& z){
+Eigen::MatrixXf sigmoid(const Eigen::MatrixXf& z){
     Eigen::MatrixXf z_new = z;
     for(int col=0; col<z.cols(); col++)
         for(int row=0; row<z.rows(); row++)    
@@ -17,6 +17,13 @@ Eigen::MatrixXf sigmoid(const Eigen::Ref<const Eigen::MatrixXf>& z){
     return z_new;
 }
 
+Eigen::MatrixXf sigmoid_prime(const Eigen::MatrixXf& z){
+    Eigen::MatrixXf z_new = sigmoid(z);
+    for(int col=0; col<z.cols(); col++)
+        for(int row=0; row<z.rows(); row++)    
+            z_new(row,col) = z_new(row,col) * (1 - z_new(row,col));
+    return z_new;
+}
 
 class Network {
     // Data
@@ -56,12 +63,40 @@ class Network {
             a << 1, 1;
             test = feedforward(a);
             std::cout << "test = \n" << test << std::endl;
+            std::cout << "test = \n" << sigmoid_prime(test) << std::endl;
         }
 
+        // Return the output of the network given input 'a'
         Eigen::MatrixXf feedforward(Eigen::MatrixXf& a){
             for(unsigned int i=0; i<biases.size(); i++)
                 a = sigmoid(weights[i] * a + biases[i]);
             return a;
+        }
+
+        /* // train the neural-network using mini-batch stochastic gradient descent */
+        /* void SGD(std::tuple<int, int> training_data, int epochs, int mini_batch_size, float eta, int test_data=0){ */
+        /*    //if(test_data) */
+        /*    //   n_test = len(test_data); */
+            
+        /*    for(int i=0; i<epochs; i++){ */
+        /*        //shuffle training data */
+        /*        //create mini_batches */
+        /*        int n_mini_batches */
+        /*        for(int j=0; j<n_mini_batches; j++) */ 
+        /*            //update_mini_batch(mini_batches[j]); */
+        /*        if(test_data) */
+        /*            printf("Epoch %d: %f / %d\n", i, evaluate(test_data), n_test); */
+        /*        else */
+        /*            printf("Epoch %d complete.\n", i); */
+        /*    } */
+
+/*         } */
+
+    private:
+        void update_mini_batch(/*mini_batch, float eta*/){
+        }
+
+        void evaluate(/*test_data*/){
         }
 };
 
