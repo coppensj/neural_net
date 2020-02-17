@@ -6,13 +6,10 @@
 
 int main(){
 
-    /* float **test_images, **training_images; */
-    /* int *test_labels, *training_labels; */
-    int num_test_images, num_training_images;
-    int test_image_size, training_image_size;
+    int num_test_images, num_training_images, num_validation_images;
+    int image_size;
     
-    load_data("../data/t10k-images-idx3-ubyte", "../data/t10k-labels-idx1-ubyte", num_test_images, test_image_size);
-    load_data("../data/train-images-idx3-ubyte", "../data/train-labels-idx1-ubyte", num_training_images, training_image_size);
+    auto [test_data, training_data, validation_data] = load_data_wrapper(num_test_images, num_training_images, num_validation_images, image_size);
 
     int N = 3;
     int layer_sizes[N] = {2, 3, 1};
