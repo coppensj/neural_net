@@ -1,4 +1,4 @@
-// 'mnist_loader.h' SRC: https://stackoverflow.com/questions/8286668/how-to-read-mnist-data-in-c
+// 'mnist_loader.h' SRC: modified from https://stackoverflow.com/questions/8286668/how-to-read-mnist-data-in-c
 
 #ifndef MNISTLOADER 
 #define MNISTLOADER
@@ -7,7 +7,10 @@
 #include <fstream>
 #include <stdexcept> // std::runtime_error
 
-unsigned char** read_mnist_images(std::string full_path, int& number_of_images, int& image_size) {
+struct image {
+    int 
+
+float** read_mnist_images(std::string full_path, int& number_of_images, int& image_size) {
     auto reverseInt = [](int i) {
         unsigned char c1, c2, c3, c4;
         c1 = i & 255, c2 = (i >> 8) & 255, c3 = (i >> 16) & 255, c4 = (i >> 24) & 255;
@@ -32,10 +35,13 @@ unsigned char** read_mnist_images(std::string full_path, int& number_of_images, 
 
         image_size = n_rows * n_cols;
 
-        uchar** _dataset = new uchar*[number_of_images];
+        float** _dataset = new float*[number_of_images];
+        uchar *_temp = new uchar[image_size];
         for(int i = 0; i < number_of_images; i++) {
-            _dataset[i] = new uchar[image_size];
-            file.read((char *)_dataset[i], image_size);
+            _dataset[i] = new float[image_size];
+            file.read((char *)_temp, image_size);
+            for(int j=0; j<image_size; j++)
+                _dataset[i][j] = float(_temp[j]);
         }
         return _dataset;
     } else {
@@ -43,7 +49,7 @@ unsigned char** read_mnist_images(std::string full_path, int& number_of_images, 
     }
 }
 
-unsigned char* read_mnist_labels(std::string full_path, int& number_of_labels) {
+int* read_mnist_labels(std::string full_path, int& number_of_labels) {
     auto reverseInt = [](int i) {
         unsigned char c1, c2, c3, c4;
         c1 = i & 255, c2 = (i >> 8) & 255, c3 = (i >> 16) & 255, c4 = (i >> 24) & 255;
@@ -62,15 +68,38 @@ unsigned char* read_mnist_labels(std::string full_path, int& number_of_labels) {
         if(magic_number != 2049) throw std::runtime_error("Invalid MNIST label file!");
 
         file.read((char *)&number_of_labels, sizeof(number_of_labels)), number_of_labels = reverseInt(number_of_labels);
-
-        uchar* _dataset = new uchar[number_of_labels];
+        
+        int* _dataset = new int[number_of_labels];
+        uchar _temp;
         for(int i = 0; i < number_of_labels; i++) {
-            file.read((char*)&_dataset[i], 1);
+            file.read((char*)&_temp, 1);
+            _dataset[i] = _temp;
         }
         return _dataset;
     } else {
         throw std::runtime_error("Unable to open file `" + full_path + "`!");
     }
+}
+
+void load_data(std::string image_path, std::string label_path, int& number_of_images, int& image_size) {
+    float **images = read_mnist_images(image_path, number_of_images, image_size);
+    int *labels = read_mnist_labels(label_path, number_of_images);
+    
+    std::cout << number_of_images << std::endl;
+    std::cout << image_size << std::endl;
+
+    std::cout << "==================" << std::endl;
+    std::cout << labels[2] << std::endl;
+    std::cout << "==================" << std::endl;
+
+    for(int row=0; row<28; row++){
+        for(int col=0; col<28; col++){
+            std::cout << images[2][col + row * 28] << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "==================" << std::endl;
+
 }
 
 #endif
