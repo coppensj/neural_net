@@ -83,12 +83,12 @@ struct training_image {
     Eigen::Matrix<float, 10, 1> value;
 };
 
-struct test_image {
+struct image {
     Eigen::MatrixXf pixels;
     int value;
 };
 
-std::tuple<test_image*, training_image*, test_image*>
+std::tuple<image*, training_image*, image*>
 load_data_wrapper(int& n_test_images, int& n_training_images, int& n_validation_images, int& image_size) {
 
     float **test_images = read_mnist_images("../data/t10k-images-idx3-ubyte", n_test_images, image_size);
@@ -97,7 +97,7 @@ load_data_wrapper(int& n_test_images, int& n_training_images, int& n_validation_
     int    *training_labels = read_mnist_labels("../data/train-labels-idx1-ubyte", n_training_images);
     n_validation_images = 10000;
 
-    test_image *test_data = new test_image[n_test_images];
+    image *test_data = new image[n_test_images];
     for(int i=0; i<n_test_images; i++){
         test_data[i].value = test_labels[i];
         test_data[i].pixels = Eigen::Map<Eigen::MatrixXf>(test_images[i], image_size, 1);
@@ -109,7 +109,7 @@ load_data_wrapper(int& n_test_images, int& n_training_images, int& n_validation_
         training_data[i].pixels = Eigen::Map<Eigen::MatrixXf>(training_images[i], image_size, 1);
     }
     
-    test_image *validation_data = new test_image[n_validation_images];
+    image *validation_data = new image[n_validation_images];
     for(int i=0; i<n_validation_images; i++){
         int j = i + n_training_images - 10000;
         validation_data[i].value = training_labels[j];
