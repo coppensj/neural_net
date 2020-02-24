@@ -6,6 +6,8 @@
 #include <random>
 #include <cmath>
 #include <Eigen/Core>
+#include <algorithm>    // std::shuffle
+#include "data_types.h" // training_image and image types
 
 #include <iostream>
 
@@ -58,12 +60,12 @@ class Network {
                         weights[i](row,col) = initial_value(generator);
             }
 
-            Eigen::MatrixXf a, test;
-            a.resize(2,1);
-            a << 1, 1;
-            test = feedforward(a);
-            std::cout << "test = \n" << test << std::endl;
-            std::cout << "test = \n" << sigmoid_prime(test) << std::endl;
+            /* Eigen::MatrixXf a, test; */
+            /* a.resize(2,1); */
+            /* a << 1, 1; */
+            /* test = feedforward(a); */
+            /* std::cout << "test = \n" << test << std::endl; */
+            /* std::cout << "test = \n" << sigmoid_prime(test) << std::endl; */
         }
 
         // Return the output of the network given input 'a'
@@ -73,24 +75,33 @@ class Network {
             return a;
         }
 
-        /* // train the neural-network using mini-batch stochastic gradient descent */
-        /* void SGD(std::tuple<int, int> training_data, int epochs, int mini_batch_size, float eta, int test_data=0){ */
-        /*    //if(test_data) */
-        /*    //   n_test = len(test_data); */
+        // train the neural-network using mini-batch stochastic gradient descent
+        void SGD(std::vector<training_image> training_data, int epochs, int mini_batch_size, float eta, std::vector<image> test_data={})
+        {
+            std::random_device rd;
+            std::mt19937 rng(rd());
             
-        /*    for(int i=0; i<epochs; i++){ */
-        /*        //shuffle training data */
-        /*        //create mini_batches */
-        /*        int n_mini_batches */
-        /*        for(int j=0; j<n_mini_batches; j++) */ 
-        /*            //update_mini_batch(mini_batches[j]); */
-        /*        if(test_data) */
-        /*            printf("Epoch %d: %f / %d\n", i, evaluate(test_data), n_test); */
-        /*        else */
-        /*            printf("Epoch %d complete.\n", i); */
-        /*    } */
-
-/*         } */
+            for(int i=0; i<epochs; i++)
+            {
+                // shuffle training data
+                std::shuffle(training_data.begin(), training_data.end(), rng);
+                
+                for(int x=0; x<10; x++)
+                    std::cout << "training[x] = " << training_data[x].value.transpose() << std::endl;
+                //create mini_batches
+                int n_mini_batches = 0;
+                n_mini_batches = training_data.size() / mini_batch_size;
+                std::cout << n_mini_batches << std::endl;
+                /* for(int j=0; j<n_mini_batches; j++) */ 
+                    //update_mini_batch(mini_batches[j]);
+               
+                if(!test_data.empty())
+                    /* printf("Epoch %d: %f / %d\n", i, evaluate(test_data), n_test_images); */
+                    printf("Epoch %d: %f / %d\n", i, -999.0, int(test_data.size()));
+                else
+                    printf("Epoch %d complete.\n", i);
+            }
+        }
 
     private:
         void update_mini_batch(/*mini_batch, float eta*/){
