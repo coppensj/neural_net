@@ -16,8 +16,9 @@ int main(){
     Network net(layer_sizes, N);
 
     net.SGD(training_data, 30, 10, 3.0);
-    std::cout << "===============\n";
-    net.SGD(training_data, 30, 10, 3.0, test_data);
+    /* net.SGD(training_data, 30, 10, 3.0); */
+    /* std::cout << "===============\n"; */
+    /* net.SGD(training_data, 30, 10, 3.0, test_data); */
     
     /* int idx = 0; */
     /* std::cout << "\n===============\n"; */

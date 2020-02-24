@@ -86,25 +86,51 @@ class Network {
                 // shuffle training data
                 std::shuffle(training_data.begin(), training_data.end(), rng);
                 
-                for(int x=0; x<10; x++)
-                    std::cout << "training[x] = " << training_data[x].value.transpose() << std::endl;
-                //create mini_batches
-                int n_mini_batches = 0;
-                n_mini_batches = training_data.size() / mini_batch_size;
-                std::cout << n_mini_batches << std::endl;
-                /* for(int j=0; j<n_mini_batches; j++) */ 
-                    //update_mini_batch(mini_batches[j]);
-               
+                //create and update mini_batches
+                int n_mini_batches = (training_data.size() + mini_batch_size - 1) / mini_batch_size;
+                for(int j=0; j<n_mini_batches; j++) 
+                {
+                    update_mini_batch(&training_data[0], j*mini_batch_size, std::min((j+1)*mini_batch_size,int(training_data.size()) ), eta);
+                }
+
                 if(!test_data.empty())
                     /* printf("Epoch %d: %f / %d\n", i, evaluate(test_data), n_test_images); */
                     printf("Epoch %d: %f / %d\n", i, -999.0, int(test_data.size()));
                 else
                     printf("Epoch %d complete.\n", i);
+                break;
             }
         }
 
     private:
-        void update_mini_batch(/*mini_batch, float eta*/){
+        void update_mini_batch(training_image *mini_batch, int start, int end, float eta)
+        {
+            int mini_batch_len = end - start;
+
+            std::vector<Eigen::MatrixXf> nabla_b;
+            nabla_b.resize(biases.size());
+            for(int i=0; i<nabla_b.size(); i++)
+                nabla_b[i] = Eigen::MatrixXf::Zero(biases[i].rows(), biases[i].cols());
+            
+            std::vector<Eigen::MatrixXf> nabla_w;
+            nabla_w.resize(weights.size());
+            for(int i=0; i<nabla_w.size(); i++)
+                nabla_w[i] = Eigen::MatrixXf::Zero(weights[i].rows(), weights[i].cols());
+
+            /* for(int i=start; i<end; i++) */
+            /* { */
+            /*     auto [delta_nabla_b, delta_nabla_w] = backprop(mini_batch[i].pixels, mini_batch[i].value); */
+                
+            /*     for(int j=0; j<nabla_b.size(); j++) */
+            /*         nabla_b[j] += delta_nabla_b[j]; */
+            /*     for(int j=0; j<nabla_w.size(); j++) */
+            /*         nabla_w[j] += delta_nabla_w[j]; */
+                
+            /*     for(int j=0; j<biases.size(); j++) */
+            /*         biases[i]  = biases - (eta/mini_batch_len) * nabla_b[i]; */
+            /*     for(int j=0; j<weights.size(); j++) */
+            /*         weights[i] = weights - (eta/mini_batch_len) * nabla_w[i]; */
+            /* } */
         }
 
         void evaluate(/*test_data*/){
