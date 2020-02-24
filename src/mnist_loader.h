@@ -5,7 +5,9 @@
 
 #include <string>
 #include <fstream>
-#include <stdexcept> // std::runtime_error
+#include <stdexcept>    // std::runtime_error
+#include "data_types.h" // training_image and image types
+#include <vector>       // std::vector
 
 float** read_mnist_images(std::string full_path, int& number_of_images, int& image_size) {
     auto reverseInt = [](int i) {
@@ -78,40 +80,37 @@ int* read_mnist_labels(std::string full_path, int& number_of_labels) {
     }
 }
 
-struct training_image {
-    Eigen::MatrixXf pixels;
-    Eigen::Matrix<float, 10, 1> value;
-};
-
-struct image {
-    Eigen::MatrixXf pixels;
-    int value;
-};
-
-std::tuple<image*, training_image*, image*>
+// return data types defined in 'data_types.h'
+std::tuple<std::vector<image>, std::vector<training_image>, std::vector<image>>
 load_data_wrapper(int& n_test_images, int& n_training_images, int& n_validation_images, int& image_size) {
 
     float **test_images = read_mnist_images("../data/t10k-images-idx3-ubyte", n_test_images, image_size);
     int    *test_labels = read_mnist_labels("../data/t10k-labels-idx1-ubyte", n_test_images);
     float **training_images = read_mnist_images("../data/train-images-idx3-ubyte", n_training_images, image_size);
     int    *training_labels = read_mnist_labels("../data/train-labels-idx1-ubyte", n_training_images);
+    
     n_validation_images = 10000;
+    n_training_images -= n_validation_images;
 
-    image *test_data = new image[n_test_images];
+    std::vector<image> test_data, validation_data;
+    std::vector<training_image> training_data;
+    
     for(int i=0; i<n_test_images; i++){
+        test_data.push_back(image());
         test_data[i].value = test_labels[i];
         test_data[i].pixels = Eigen::Map<Eigen::MatrixXf>(test_images[i], image_size, 1);
     }
-    
-    training_image *training_data = new training_image[n_training_images - 10000];
-    for(int i=0; i<n_training_images - 10000; i++){
+   
+    for(int i=0; i<n_training_images; i++){
+        training_data.push_back(training_image());
         training_data[i].value(training_labels[i],0) = 1;
         training_data[i].pixels = Eigen::Map<Eigen::MatrixXf>(training_images[i], image_size, 1);
     }
-    
-    image *validation_data = new image[n_validation_images];
+   
+    // separate last 10000 images from training data to form a validation set
     for(int i=0; i<n_validation_images; i++){
-        int j = i + n_training_images - 10000;
+        int j = i + n_training_images;
+        validation_data.push_back(image());
         validation_data[i].value = training_labels[j];
         validation_data[i].pixels = Eigen::Map<Eigen::MatrixXf>(training_images[j], image_size, 1);
     }

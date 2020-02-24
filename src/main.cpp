@@ -15,5 +15,8 @@ int main(){
     int layer_sizes[N] = {2, 3, 1};
     Network net(layer_sizes, N);
 
+    /* net.SGD(training_data, num_training_images, 30, 10, 3.0); */
+    /* net.SGD(training_data, num_training_images, 30, 10, 3.0, test_data, num_test_images); */
+
     return 0;
 }
