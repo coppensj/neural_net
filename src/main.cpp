@@ -10,6 +10,17 @@ int main(){
     int image_size;
     
     auto [test_data, training_data, validation_data] = load_data_wrapper(num_test_images, num_training_images, num_validation_images, image_size);
+    
+    int idx = 4230;
+    std::cout << "==================" << std::endl;
+    std::cout << "==================" << std::endl;
+    std::cout << test_data[idx].value << std::endl;
+
+    std::cout << "==================" << std::endl;
+    std::cout << training_data[idx].value.transpose() << std::endl;
+    
+    std::cout << "==================" << std::endl;
+    std::cout << validation_data[idx].value << std::endl;
 
     int N = 3;
     int layer_sizes[N] = {2, 3, 1};
