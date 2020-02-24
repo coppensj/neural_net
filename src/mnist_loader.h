@@ -116,31 +116,6 @@ load_data_wrapper(int& n_test_images, int& n_training_images, int& n_validation_
         validation_data[i].pixels = Eigen::Map<Eigen::MatrixXf>(training_images[j], image_size, 1);
     }
 
-    int idx = 4230;
-    std::cout << "==================" << std::endl;
-    std::cout << test_labels[idx] << std::endl;
-    std::cout << test_data[idx].value << std::endl;
-    float sum = 0;
-    for(int row=0; row<image_size; row++)
-        sum += test_images[idx][row] - test_data[idx].pixels(row,0);
-    std::cout << sum << std::endl;
-
-    std::cout << "==================" << std::endl;
-    std::cout << training_labels[idx] << std::endl;
-    std::cout << training_data[idx].value.transpose() << std::endl;
-    sum = 0;
-    for(int row=0; row<image_size; row++)
-        sum += training_images[idx][row] - training_data[idx].pixels(row,0);
-    std::cout << sum << std::endl;
-    
-    std::cout << "==================" << std::endl;
-    std::cout << training_labels[idx + n_training_images - 10000] << std::endl;
-    std::cout << validation_data[idx].value << std::endl;
-    sum = 0;
-    for(int row=0; row<image_size; row++)
-        sum += training_images[idx + n_training_images - 10000][row] - validation_data[idx].pixels(row,0);
-    std::cout << sum << std::endl;
-
     return {test_data, training_data, validation_data};
 }
 
