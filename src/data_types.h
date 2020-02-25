@@ -1,28 +1,18 @@
 // 'data_types.h' SRC: J.Coppens 2020
 
-#ifndef DATATYPES
-#define DATATYPES
+#ifndef NEURAL_NET_DATATYPES_H_
+#define NEURAL_NET_DATATYPES_H_
 
 #include <Eigen/Core>
 
 struct training_image {
     Eigen::MatrixXf pixels;
-    Eigen::Matrix<float, 10, 1> value;
-
-    training_image()
-    {
-        value << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-    }
+    Eigen::Matrix<float, 10, 1> value = Eigen::MatrixXf::Zero(10,1);
 };
 
 struct image {
     Eigen::MatrixXf pixels;
-    int value;
-
-    image()
-    {
-        value = 0;
-    }
+    int value = 0;
 };
 
-#endif
+#endif  // NEURAL_NET_DATATYPES_H_
