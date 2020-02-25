@@ -4,7 +4,7 @@
 #include "network.h"
 #include "mnist_loader.h"
 
-int main(){
+int main() {
 
     int num_test_images, num_training_images, num_validation_images;
     int image_size;
@@ -13,12 +13,10 @@ int main(){
     
     int N = 3;
     int layer_sizes[N] = {2, 3, 1};
-    Network net(layer_sizes, N);
+    NeuralNetwork net(layer_sizes, N);
 
     net.SGD(training_data, 30, 10, 3.0);
-    /* net.SGD(training_data, 30, 10, 3.0); */
-    /* std::cout << "===============\n"; */
-    /* net.SGD(training_data, 30, 10, 3.0, test_data); */
+    net.SGD(training_data, 30, 10, 3.0, test_data);
     
     /* int idx = 0; */
     /* std::cout << "\n===============\n"; */

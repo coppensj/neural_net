@@ -1,15 +1,18 @@
 // 'mnist_loader.h' SRC: modified from https://stackoverflow.com/questions/8286668/how-to-read-mnist-data-in-c
 
-#ifndef MNISTLOADER 
-#define MNISTLOADER
+#ifndef NEURAL_NET_MNIST_H_ 
+#define NEURAL_NET_MNIST_H_
 
 #include <string>
 #include <fstream>
 #include <stdexcept>    // std::runtime_error
-#include "data_types.h" // training_image and image types
 #include <vector>       // std::vector
+#include <Eigen/Core>
 
-float** read_mnist_images(std::string full_path, int& number_of_images, int& image_size) {
+#include "data_types.h" // training_image and image types
+
+float** 
+read_mnist_images(std::string full_path, int& number_of_images, int& image_size) {
     auto reverseInt = [](int i) {
         unsigned char c1, c2, c3, c4;
         c1 = i & 255, c2 = (i >> 8) & 255, c3 = (i >> 16) & 255, c4 = (i >> 24) & 255;
@@ -20,7 +23,7 @@ float** read_mnist_images(std::string full_path, int& number_of_images, int& ima
 
     std::ifstream file(full_path, std::ios::binary);
 
-    if(file.is_open()) {
+    if (file.is_open()) {
         int magic_number = 0, n_rows = 0, n_cols = 0;
 
         file.read((char *)&magic_number, sizeof(magic_number));
@@ -28,7 +31,8 @@ float** read_mnist_images(std::string full_path, int& number_of_images, int& ima
 
         if(magic_number != 2051) throw std::runtime_error("Invalid MNIST image file!");
 
-        file.read((char *)&number_of_images, sizeof(number_of_images)), number_of_images = reverseInt(number_of_images);
+        file.read((char *)&number_of_images, sizeof(number_of_images)), 
+            number_of_images = reverseInt(number_of_images);
         file.read((char *)&n_rows, sizeof(n_rows)), n_rows = reverseInt(n_rows);
         file.read((char *)&n_cols, sizeof(n_cols)), n_cols = reverseInt(n_cols);
 
@@ -48,7 +52,8 @@ float** read_mnist_images(std::string full_path, int& number_of_images, int& ima
     }
 }
 
-int* read_mnist_labels(std::string full_path, int& number_of_labels) {
+int* 
+read_mnist_labels(std::string full_path, int& number_of_labels) {
     auto reverseInt = [](int i) {
         unsigned char c1, c2, c3, c4;
         c1 = i & 255, c2 = (i >> 8) & 255, c3 = (i >> 16) & 255, c4 = (i >> 24) & 255;
@@ -59,18 +64,19 @@ int* read_mnist_labels(std::string full_path, int& number_of_labels) {
 
     std::ifstream file(full_path, std::ios::binary);
 
-    if(file.is_open()) {
+    if (file.is_open()) {
         int magic_number = 0;
         file.read((char *)&magic_number, sizeof(magic_number));
         magic_number = reverseInt(magic_number);
 
-        if(magic_number != 2049) throw std::runtime_error("Invalid MNIST label file!");
+        if (magic_number != 2049) throw std::runtime_error("Invalid MNIST label file!");
 
-        file.read((char *)&number_of_labels, sizeof(number_of_labels)), number_of_labels = reverseInt(number_of_labels);
+        file.read((char *)&number_of_labels, sizeof(number_of_labels)), 
+            number_of_labels = reverseInt(number_of_labels);
         
         int* _dataset = new int[number_of_labels];
         uchar _temp;
-        for(int i = 0; i < number_of_labels; i++) {
+        for (int i = 0; i < number_of_labels; i++) {
             file.read((char*)&_temp, 1);
             _dataset[i] = _temp;
         }
@@ -92,23 +98,23 @@ load_data_wrapper(int& n_test_images, int& n_training_images, int& n_validation_
     n_validation_images = 10000;
     n_training_images -= n_validation_images;
 
-    std::vector<image> test_data, validation_data;
-    std::vector<training_image> training_data;
-    
-    for(int i=0; i<n_test_images; i++){
+    std::vector<image> test_data;
+    for (int i=0; i<n_test_images; i++) {
         test_data.push_back(image());
         test_data[i].value = test_labels[i];
         test_data[i].pixels = Eigen::Map<Eigen::MatrixXf>(test_images[i], image_size, 1);
     }
    
-    for(int i=0; i<n_training_images; i++){
+    std::vector<training_image> training_data;
+    for (int i=0; i<n_training_images; i++) {
         training_data.push_back(training_image());
         training_data[i].value(training_labels[i],0) = 1;
         training_data[i].pixels = Eigen::Map<Eigen::MatrixXf>(training_images[i], image_size, 1);
     }
    
     // separate last 10000 images from training data to form a validation set
-    for(int i=0; i<n_validation_images; i++){
+    std::vector<image> validation_data;
+    for (int i=0; i<n_validation_images; i++) {
         int j = i + n_training_images;
         validation_data.push_back(image());
         validation_data[i].value = training_labels[j];
@@ -118,4 +124,4 @@ load_data_wrapper(int& n_test_images, int& n_training_images, int& n_validation_
     return {test_data, training_data, validation_data};
 }
 
-#endif
+#endif  // NEURAL_NET_MNIST_H_ 
