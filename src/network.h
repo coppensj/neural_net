@@ -63,13 +63,6 @@ class NeuralNetwork {
                     for (int row=0; row<weights_[i].rows(); row++)    
                         weights_[i](row,col) = initial_value(generator);
             }
-
-            /* Eigen::MatrixXf a, test; */
-            /* a.resize(2,1); */
-            /* a << 1, 1; */
-            /* test = feedforward(a); */
-            /* std::cout << "test = " << test << std::endl; */
-            /* std::cout << "test = " << SigmoidPrime(test) << std::endl; */
         }
 
         // Return the output of the network given input 'a'
@@ -94,6 +87,7 @@ class NeuralNetwork {
                 for (int j=0; j<n_mini_batches; j++) {
                     UpdateMiniBatch(&training_data[0], j * mini_batch_size, 
                             std::min( (j + 1) * mini_batch_size, int(training_data.size()) ), eta);
+                    break; /////<<---- REMOVE LATER
                 }
 
                 if (test_data.empty())
@@ -109,35 +103,78 @@ class NeuralNetwork {
         void UpdateMiniBatch(training_image *mini_batch, int start, int end, float eta) {
             int mini_batch_len = end - start;
 
-            std::vector<Eigen::MatrixXf> nabla_b;
-            nabla_b.resize(biases_.size());
+            std::vector<Eigen::MatrixXf> nabla_b(biases_.size());
             for (int i=0; i<nabla_b.size(); i++)
                 nabla_b[i] = Eigen::MatrixXf::Zero(biases_[i].rows(), biases_[i].cols());
+            auto delta_nabla_b(nabla_b);
             
-            std::vector<Eigen::MatrixXf> nabla_w;
-            nabla_w.resize(weights_.size());
+            std::vector<Eigen::MatrixXf> nabla_w(weights_.size());
             for (int i=0; i<nabla_w.size(); i++)
                 nabla_w[i] = Eigen::MatrixXf::Zero(weights_[i].rows(), weights_[i].cols());
+            auto delta_nabla_w(nabla_w);
+            
+            /////////// THIS IS FOR TESTING /////////////
+            Eigen::MatrixXf a, val;
+            a.resize(2,1);
+            val.resize(2,1);
+            a << 1, 1;
+            val << 2, 2;
+            /////////// THIS IS FOR TESTING /////////////
 
-            /* for (int i=start; i<end; i++) { */
-            /*     std::cout << i << " " << mini_batch[i].value.transpose() << std::endl; */
-            /*     /1* auto [delta_nabla_b, delta_nabla_w] = backprop(mini_batch[i].pixels, mini_batch[i].value); *1/ */
+            for (int i=start; i<end; i++) {
+                /* backprop(mini_batch[i].pixels, mini_batch[i].value, delta_nabla_b, delta_nabla_w); */
+                backprop(a, val, delta_nabla_b, delta_nabla_w);
                 
-            /*     /1* for(int j=0; j<nabla_b.size(); j++) *1/ */
-            /*     /1*     nabla_b[j] += delta_nabla_b[j]; *1/ */
-            /*     /1* for(int j=0; j<nabla_w.size(); j++) *1/ */
-            /*     /1*     nabla_w[j] += delta_nabla_w[j]; *1/ */
+                /* for(int j=0; j<nabla_b.size(); j++) */
+                /*     nabla_b[j] += delta_nabla_b[j]; */
+                /* for(int j=0; j<nabla_w.size(); j++) */
+                /*     nabla_w[j] += delta_nabla_w[j]; */
                 
-            /*     /1* for(int j=0; j<biases_.size(); j++) *1/ */
-            /*     /1*     biases_[i]  = biases_ - (eta / mini_batch_len) * nabla_b[i]; *1/ */
-            /*     /1* for(int j=0; j<weights_.size(); j++) *1/ */
-            /*     /1*     weights_[i] = weights_ - (eta / mini_batch_len) * nabla_w[i]; *1/ */
-            /* } */
+                /* for(int j=0; j<biases_.size(); j++) */
+                /*     biases_[i]  = biases_ - (eta / mini_batch_len) * nabla_b[i]; */
+                /* for(int j=0; j<weights_.size(); j++) */
+                /*     weights_[i] = weights_ - (eta / mini_batch_len) * nabla_w[i]; */
+            }
+        }
+
+        void backprop(Eigen::MatrixXf& pixels, Eigen::MatrixXf& value, std::vector<Eigen::MatrixXf> nabla_b, 
+                std::vector<Eigen::MatrixXf> nabla_w){
+            auto activation = pixels;
+            std::vector<Eigen::MatrixXf> activations(1,pixels);
+            std::vector<Eigen::MatrixXf> zs;
+
+            for(int layer=0; layer<biases_.size(); layer++){
+                /* std::cout << "Layer " << layer << std::endl; */
+                /* std::cout << "bias[layer] =\n" << biases_[layer] << std::endl; */
+                /* std::cout << "weight[layer] =\n" << weights_[layer] << std::endl; */
+                /* std::cout << "a[layer] =\n" << activation << std::endl; */
+                auto z = weights_[layer] * activation + biases_[layer];
+                /* std::cout << "z =\n" << z << std::endl; */
+                zs.push_back(z);
+                activation = Sigmoid(z);
+                activations.push_back(activation);
+            }
+            std::cout << "==========Backprop done ============\n";
+
+            auto delta = cost_derivative(activations.back(), value);
+            delta = delta.cwiseProduct(SigmoidPrime(zs.back()));
+            nabla_b.back() = delta;
+            nabla_w.back() = delta * activations[activations.size()-2].transpose();
+            /* std::cout << "delta = " << delta << std::endl; */
+            /* std::cout << "nb_b =\n" << nabla_b.back() << std::endl; */
+            /* std::cout << "nw_back =\n" << nabla_w.back() << std::endl; */
+
+            return;
         }
 
         int Evaluate(std::vector<image> test_data) {
             return -1;
         }
+
+        Eigen::MatrixXf cost_derivative(Eigen::MatrixXf& output_activations, Eigen::MatrixXf& value){
+            return output_activations - value;
+        }
+
 };  // class NeuralNetwork
 
 #endif  // NEURAL_NET_NETWORK_H_

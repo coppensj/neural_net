@@ -12,12 +12,13 @@ int main() {
     auto [test_data, training_data, validation_data] = load_data_wrapper(num_test_images, num_training_images, num_validation_images, image_size);
     
     int N = 3;
-    int layer_sizes[N] = {2, 3, 1};
+    int layer_sizes[N] = {2, 4, 2};
     NeuralNetwork net(layer_sizes, N);
 
-    net.SGD(training_data, 30, 10, 3.0);
+    /* net.SGD(training_data, 30, 10, 3.0); */
     net.SGD(training_data, 30, 10, 3.0, test_data);
     
+    /////////// THIS IS FOR TESTING /////////////
     /* int idx = 0; */
     /* std::cout << "\n===============\n"; */
     /* std::cout << test_data[idx].value << std::endl; */
@@ -28,6 +29,7 @@ int main() {
     /* std::cout << "===============\n"; */
     /* std::cout << validation_data[idx].value << std::endl; */
     /* std::cout << num_validation_images << std::endl; */
+    /////////// THIS IS FOR TESTING /////////////
 
     return 0;
 }
