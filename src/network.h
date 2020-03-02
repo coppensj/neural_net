@@ -49,7 +49,7 @@ class NeuralNetwork {
 
             // Initialize biases
             biases_.resize(num_layers_ - 1);
-            for (int i=0; i<biases_.size(); i++) {
+            for (unsigned int i=0; i<biases_.size(); i++) {
                 biases_[i].resize(layer_sizes_[i+1],1);
                 for(int row=0; row<biases_[i].rows(); row++)
                     biases_[i](row, 0) = initial_value(generator);
@@ -57,7 +57,7 @@ class NeuralNetwork {
            
             // Initialize weights
             weights_.resize(num_layers_ - 1);
-            for (int i=0; i<weights_.size(); i++) {
+            for (unsigned int i=0; i<weights_.size(); i++) {
                 weights_[i].resize(layer_sizes_[i+1], layer_sizes_[i]);
                 for (int col=0; col<weights_[i].cols(); col++)
                     for (int row=0; row<weights_[i].rows(); row++)    
@@ -104,12 +104,12 @@ class NeuralNetwork {
             int mini_batch_len = end - start;
 
             std::vector<Eigen::MatrixXf> nabla_b(biases_.size());
-            for (int i=0; i<nabla_b.size(); i++)
+            for (unsigned int i=0; i<nabla_b.size(); i++)
                 nabla_b[i] = Eigen::MatrixXf::Zero(biases_[i].rows(), biases_[i].cols());
             auto delta_nabla_b(nabla_b);
             
             std::vector<Eigen::MatrixXf> nabla_w(weights_.size());
-            for (int i=0; i<nabla_w.size(); i++)
+            for (unsigned int i=0; i<nabla_w.size(); i++)
                 nabla_w[i] = Eigen::MatrixXf::Zero(weights_[i].rows(), weights_[i].cols());
             auto delta_nabla_w(nabla_w);
             
@@ -123,17 +123,22 @@ class NeuralNetwork {
 
             for (int i=start; i<end; i++) {
                 /* backprop(mini_batch[i].pixels, mini_batch[i].value, delta_nabla_b, delta_nabla_w); */
-                backprop(a, val, delta_nabla_b, delta_nabla_w);
+                backprop(a, val, delta_nabla_b, delta_nabla_w); //for testing
                 
-                /* for(int j=0; j<nabla_b.size(); j++) */
-                /*     nabla_b[j] += delta_nabla_b[j]; */
-                /* for(int j=0; j<nabla_w.size(); j++) */
-                /*     nabla_w[j] += delta_nabla_w[j]; */
+                std::cout << "nb[0] =\n" << nabla_b[0] << std::endl;
+                std::cout << "nw[0] =\n" << nabla_w[0] << std::endl;
+                for(int j=0; j<nabla_b.size(); j++)
+                    nabla_b[j] += delta_nabla_b[j];
+                for(int j=0; j<nabla_w.size(); j++)
+                    nabla_w[j] += delta_nabla_w[j];
+                std::cout << "nb[0] =\n" << nabla_b[0] << std::endl;
+                std::cout << "nw[0] =\n" << nabla_w[0] << std::endl;
                 
                 /* for(int j=0; j<biases_.size(); j++) */
-                /*     biases_[i]  = biases_ - (eta / mini_batch_len) * nabla_b[i]; */
+                /*     biases_[i]  = biases_[i] - (eta / mini_batch_len) * nabla_b[i]; */
                 /* for(int j=0; j<weights_.size(); j++) */
-                /*     weights_[i] = weights_ - (eta / mini_batch_len) * nabla_w[i]; */
+                /*     weights_[i] = weights_[i] - (eta / mini_batch_len) * nabla_w[i]; */
+                break; // <----remove later
             }
         }
 
@@ -143,7 +148,7 @@ class NeuralNetwork {
             std::vector<Eigen::MatrixXf> activations(1,pixels);
             std::vector<Eigen::MatrixXf> zs;
 
-            for(int layer=0; layer<biases_.size(); layer++){
+            for (unsigned int layer=0; layer<biases_.size(); layer++) {
                 /* std::cout << "Layer " << layer << std::endl; */
                 /* std::cout << "bias[layer] =\n" << biases_[layer] << std::endl; */
                 /* std::cout << "weight[layer] =\n" << weights_[layer] << std::endl; */
@@ -163,6 +168,17 @@ class NeuralNetwork {
             /* std::cout << "delta = " << delta << std::endl; */
             /* std::cout << "nb_b =\n" << nabla_b.back() << std::endl; */
             /* std::cout << "nw_back =\n" << nabla_w.back() << std::endl; */
+
+            for (int l=2; l<num_layers_; l++) {
+                auto z = zs[zs.size() - l];
+                auto sp = SigmoidPrime(z);
+                delta = weights_[weights_.size() - l + 1].transpose() * delta;
+                delta = delta.cwiseProduct(sp);
+                nabla_b[nabla_b.size() - l] = delta;
+                nabla_w[nabla_w.size() - l] = delta * activations[activations.size() - l - 1].transpose(); 
+            }
+            std::cout << "nb[0] =\n" << nabla_b[0] << std::endl;
+            std::cout << "nw[0] =\n" << nabla_w[0] << std::endl;
 
             return;
         }
