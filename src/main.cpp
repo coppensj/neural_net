@@ -12,7 +12,7 @@ int main() {
     auto [test_data, training_data, validation_data] = load_data_wrapper(num_test_images, num_training_images, num_validation_images, image_size);
     
     int N = 3;
-    int layer_sizes[N] = {2, 4, 2};
+    int layer_sizes[N] = {784, 30, 10};
     NeuralNetwork net(layer_sizes, N);
 
     /* net.SGD(training_data, 30, 10, 3.0); */

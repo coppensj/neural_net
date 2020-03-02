@@ -87,7 +87,7 @@ class NeuralNetwork {
                 for (int j=0; j<n_mini_batches; j++) {
                     UpdateMiniBatch(&training_data[0], j * mini_batch_size, 
                             std::min( (j + 1) * mini_batch_size, int(training_data.size()) ), eta);
-                    break; /////<<---- REMOVE LATER
+                    /* break; /////<<---- REMOVE LATER */
                 }
 
                 if (test_data.empty())
@@ -95,7 +95,7 @@ class NeuralNetwork {
                 else
                     printf("Epoch %d: %d / %d\n", i, Evaluate(test_data), int(test_data.size()));
                 
-                break; /////<<---- REMOVE LATER
+                /* break; /////<<---- REMOVE LATER */
             }
         }
 
@@ -114,36 +114,33 @@ class NeuralNetwork {
             auto delta_nabla_w(nabla_w);
             
             /////////// THIS IS FOR TESTING /////////////
-            Eigen::MatrixXf a, val;
-            a.resize(2,1);
-            val.resize(2,1);
-            a << 1, 1;
-            val << 2, 2;
+            /* Eigen::MatrixXf a, val; */
+            /* a.resize(2,1); */
+            /* val.resize(2,1); */
+            /* a << 1, 1; */
+            /* val << 2, 2; */
+            /* std::cout << start << " " << end << std::endl; */
             /////////// THIS IS FOR TESTING /////////////
 
             for (int i=start; i<end; i++) {
-                /* backprop(mini_batch[i].pixels, mini_batch[i].value, delta_nabla_b, delta_nabla_w); */
-                backprop(a, val, delta_nabla_b, delta_nabla_w); //for testing
+                backprop(mini_batch[i].pixels, mini_batch[i].value, delta_nabla_b, delta_nabla_w);
+                /* backprop(a, val, delta_nabla_b, delta_nabla_w); //for testing */
                 
-                std::cout << "nb[0] =\n" << nabla_b[0] << std::endl;
-                std::cout << "nw[0] =\n" << nabla_w[0] << std::endl;
-                for(int j=0; j<nabla_b.size(); j++)
+                for (unsigned int j=0; j<nabla_b.size(); j++)
                     nabla_b[j] += delta_nabla_b[j];
-                for(int j=0; j<nabla_w.size(); j++)
+                for (unsigned int j=0; j<nabla_w.size(); j++)
                     nabla_w[j] += delta_nabla_w[j];
-                std::cout << "nb[0] =\n" << nabla_b[0] << std::endl;
-                std::cout << "nw[0] =\n" << nabla_w[0] << std::endl;
-                
-                /* for(int j=0; j<biases_.size(); j++) */
-                /*     biases_[i]  = biases_[i] - (eta / mini_batch_len) * nabla_b[i]; */
-                /* for(int j=0; j<weights_.size(); j++) */
-                /*     weights_[i] = weights_[i] - (eta / mini_batch_len) * nabla_w[i]; */
-                break; // <----remove later
+               
+                for (unsigned int j=0; j<biases_.size(); j++) 
+                    biases_[j] -= (eta / mini_batch_len) * nabla_b[j];
+                for (unsigned int j=0; j<weights_.size(); j++)
+                    weights_[j] -= (eta / mini_batch_len) * nabla_w[j];
+                /* break; /////<<---- REMOVE LATER */
             }
         }
 
-        void backprop(Eigen::MatrixXf& pixels, Eigen::MatrixXf& value, std::vector<Eigen::MatrixXf> nabla_b, 
-                std::vector<Eigen::MatrixXf> nabla_w){
+        void backprop(Eigen::MatrixXf& pixels, Eigen::MatrixXf& value, std::vector<Eigen::MatrixXf> &nabla_b, 
+                std::vector<Eigen::MatrixXf> &nabla_w){
             auto activation = pixels;
             std::vector<Eigen::MatrixXf> activations(1,pixels);
             std::vector<Eigen::MatrixXf> zs;
@@ -159,7 +156,6 @@ class NeuralNetwork {
                 activation = Sigmoid(z);
                 activations.push_back(activation);
             }
-            std::cout << "==========Backprop done ============\n";
 
             auto delta = cost_derivative(activations.back(), value);
             delta = delta.cwiseProduct(SigmoidPrime(zs.back()));
@@ -177,9 +173,6 @@ class NeuralNetwork {
                 nabla_b[nabla_b.size() - l] = delta;
                 nabla_w[nabla_w.size() - l] = delta * activations[activations.size() - l - 1].transpose(); 
             }
-            std::cout << "nb[0] =\n" << nabla_b[0] << std::endl;
-            std::cout << "nw[0] =\n" << nabla_w[0] << std::endl;
-
             return;
         }
 
