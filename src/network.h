@@ -66,7 +66,7 @@ class NeuralNetwork {
         }
 
         // Return the output of the network given input 'a'
-        Eigen::MatrixXf feedforward(Eigen::MatrixXf& a) {
+        Eigen::MatrixXf feedforward(Eigen::MatrixXf a) {
             for (unsigned int i=0; i<biases_.size(); i++)
                 a = Sigmoid(weights_[i] * a + biases_[i]);
             return a;
@@ -93,7 +93,7 @@ class NeuralNetwork {
                 if (test_data.empty())
                     printf("Epoch %d complete.\n", i);
                 else
-                    printf("Epoch %d: %d / %d\n", i, Evaluate(test_data), int(test_data.size()));
+                    printf("Epoch %d: %d / %lu\n", i, Evaluate(test_data), test_data.size());
                 
                 /* break; /////<<---- REMOVE LATER */
             }
@@ -139,7 +139,7 @@ class NeuralNetwork {
             }
         }
 
-        void backprop(Eigen::MatrixXf& pixels, Eigen::MatrixXf& value, std::vector<Eigen::MatrixXf> &nabla_b, 
+        void backprop(Eigen::MatrixXf &pixels, Eigen::MatrixXf &value, std::vector<Eigen::MatrixXf> &nabla_b, 
                 std::vector<Eigen::MatrixXf> &nabla_w){
             auto activation = pixels;
             std::vector<Eigen::MatrixXf> activations(1,pixels);
@@ -176,11 +176,22 @@ class NeuralNetwork {
             return;
         }
 
-        int Evaluate(std::vector<image> test_data) {
-            return -1;
+        int Evaluate(std::vector<image> &test_data) {
+            std::cout << "Evaluating...\n";
+            int sum = 0;
+            Eigen::MatrixXf::Index maxRow, maxCol;
+            for (unsigned int i=0; i<test_data.size(); i++) {
+                feedforward(test_data[i].pixels).maxCoeff(&maxRow, &maxCol);
+                sum += (test_data[i].value == maxRow);
+                /* std::cout << test_data[i].value << " " << maxRow */ 
+                /*     << "  = " << (test_data[i].value == maxRow) << std::endl; */
+                /* if(i>10) */
+                /*     break; */
+            }
+            return sum;
         }
 
-        Eigen::MatrixXf cost_derivative(Eigen::MatrixXf& output_activations, Eigen::MatrixXf& value){
+        Eigen::MatrixXf cost_derivative(Eigen::MatrixXf &output_activations, Eigen::MatrixXf &value){
             return output_activations - value;
         }
 
