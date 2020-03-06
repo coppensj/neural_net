@@ -15,17 +15,26 @@ int main() {
     int layer_sizes[N] = {784, 30, 10};
     NeuralNetwork net(layer_sizes, N);
 
-    /* net.SGD(training_data, 30, 10, 3.0); */
+    // data, epochs, batch size, eta
     net.SGD(training_data, 30, 10, 3.0, test_data);
+    /* net.SGD(training_data, 2, 10, 3.0, test_data); */
     
     /////////// THIS IS FOR TESTING /////////////
-    /* int idx = 0; */
-    /* std::cout << "\n===============\n"; */
-    /* std::cout << test_data[idx].value << std::endl; */
-    /* std::cout << num_test_images << std::endl; */
+    int idx = 0;
+    std::cout << "\n===============\n";
+    std::cout << test_data[idx].value << std::endl;
+    for (int i=0; i<28; i++) {
+        for (int j=0; j<28; j++) 
+            printf("%3.0f ", test_data[idx].pixels(j+i*28,0));
+        std::cout << std::endl;
+    }
     /* std::cout << "===============\n"; */
     /* std::cout << training_data[idx].value.transpose() << std::endl; */
-    /* std::cout << num_training_images << std::endl; */
+    /* for (int i=0; i<28; i++) { */
+    /*     for (int j=0; j<28; j++) */ 
+    /*         printf("%3.0f ", training_data[idx].pixels(j+i*28,0)); */
+    /*     std::cout << std::endl; */
+    /* } */
     /* std::cout << "===============\n"; */
     /* std::cout << validation_data[idx].value << std::endl; */
     /* std::cout << num_validation_images << std::endl; */

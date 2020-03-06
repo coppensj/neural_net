@@ -14,7 +14,7 @@
 
 Eigen::MatrixXf 
 Sigmoid(const Eigen::MatrixXf& z) {
-    Eigen::MatrixXf z_new = z;
+    auto z_new = z;
     for (int col=0; col<z.cols(); col++)
         for (int row=0; row<z.rows(); row++)    
             z_new(row,col) = 1.0/(1.0 + exp(-z(row,col)));
@@ -23,7 +23,7 @@ Sigmoid(const Eigen::MatrixXf& z) {
 
 Eigen::MatrixXf 
 SigmoidPrime(const Eigen::MatrixXf& z) {
-    Eigen::MatrixXf z_new = Sigmoid(z);
+    auto z_new = Sigmoid(z);
     for (int col=0; col<z.cols(); col++)
         for (int row=0; row<z.rows(); row++)    
             z_new(row,col) = z_new(row,col) * (1 - z_new(row,col));
@@ -65,13 +65,6 @@ class NeuralNetwork {
             }
         }
 
-        // Return the output of the network given input 'a'
-        Eigen::MatrixXf feedforward(Eigen::MatrixXf a) {
-            for (unsigned int i=0; i<biases_.size(); i++)
-                a = Sigmoid(weights_[i] * a + biases_[i]);
-            return a;
-        }
-
         // train the neural-network using mini-batch stochastic gradient descent
         void SGD(std::vector<training_image> training_data, int epochs, int mini_batch_size, 
                 float eta, std::vector<image> test_data={}) {
@@ -83,75 +76,76 @@ class NeuralNetwork {
                 std::shuffle(training_data.begin(), training_data.end(), rng);
                 
                 //create and update mini_batches
-                int n_mini_batches = (training_data.size() + mini_batch_size - 1) / mini_batch_size;
-                for (int j=0; j<n_mini_batches; j++) {
-                    UpdateMiniBatch(&training_data[0], j * mini_batch_size, 
-                            std::min( (j + 1) * mini_batch_size, int(training_data.size()) ), eta);
-                    /* break; /////<<---- REMOVE LATER */
+                for (unsigned int j=0; j<training_data.size(); j+=mini_batch_size) {
+                    auto k = std::min(j + mini_batch_size, (unsigned int)training_data.size());
+                    UpdateMiniBatch(&training_data[0], j, k, eta);
+                    /* break; ////////////////////////// */
                 }
-
+                
                 if (test_data.empty())
                     printf("Epoch %d complete.\n", i);
                 else
                     printf("Epoch %d: %d / %lu\n", i, Evaluate(test_data), test_data.size());
-                
-                /* break; /////<<---- REMOVE LATER */
+                /* break; ////////////////////////// */
             }
         }
 
     private:
+        // Return the output of the network given input 'a'
+        Eigen::MatrixXf feedforward(Eigen::MatrixXf a) {
+            for (unsigned int i=0; i<biases_.size(); i++)
+                a = Sigmoid(weights_[i] * a + biases_[i]);
+            return a;
+        }
+
         void UpdateMiniBatch(training_image *mini_batch, int start, int end, float eta) {
             int mini_batch_len = end - start;
 
             std::vector<Eigen::MatrixXf> nabla_b(biases_.size());
             for (unsigned int i=0; i<nabla_b.size(); i++)
                 nabla_b[i] = Eigen::MatrixXf::Zero(biases_[i].rows(), biases_[i].cols());
-            auto delta_nabla_b(nabla_b);
+            /* auto delta_nabla_b(nabla_b); */
             
             std::vector<Eigen::MatrixXf> nabla_w(weights_.size());
             for (unsigned int i=0; i<nabla_w.size(); i++)
                 nabla_w[i] = Eigen::MatrixXf::Zero(weights_[i].rows(), weights_[i].cols());
-            auto delta_nabla_w(nabla_w);
-            
-            /////////// THIS IS FOR TESTING /////////////
-            /* Eigen::MatrixXf a, val; */
-            /* a.resize(2,1); */
-            /* val.resize(2,1); */
-            /* a << 1, 1; */
-            /* val << 2, 2; */
-            /* std::cout << start << " " << end << std::endl; */
-            /////////// THIS IS FOR TESTING /////////////
+            /* auto delta_nabla_w(nabla_w); */
 
             for (int i=start; i<end; i++) {
-                backprop(mini_batch[i].pixels, mini_batch[i].value, delta_nabla_b, delta_nabla_w);
-                /* backprop(a, val, delta_nabla_b, delta_nabla_w); //for testing */
+                /* backprop(mini_batch[i].pixels, mini_batch[i].value, delta_nabla_b, delta_nabla_w); */
+                auto [delta_nabla_b, delta_nabla_w] = backprop(mini_batch[i].pixels, mini_batch[i].value);
                 
                 for (unsigned int j=0; j<nabla_b.size(); j++)
                     nabla_b[j] += delta_nabla_b[j];
                 for (unsigned int j=0; j<nabla_w.size(); j++)
                     nabla_w[j] += delta_nabla_w[j];
-               
-                for (unsigned int j=0; j<biases_.size(); j++) 
-                    biases_[j] -= (eta / mini_batch_len) * nabla_b[j];
-                for (unsigned int j=0; j<weights_.size(); j++)
-                    weights_[j] -= (eta / mini_batch_len) * nabla_w[j];
-                /* break; /////<<---- REMOVE LATER */
+                /* break; ////////////////////////// */
             }
+               
+            for (unsigned int j=0; j<biases_.size(); j++) 
+                biases_[j] -= (eta / mini_batch_len) * nabla_b[j];
+            for (unsigned int j=0; j<weights_.size(); j++)
+                weights_[j] -= (eta / mini_batch_len) * nabla_w[j];
         }
 
-        void backprop(Eigen::MatrixXf &pixels, Eigen::MatrixXf &value, std::vector<Eigen::MatrixXf> &nabla_b, 
-                std::vector<Eigen::MatrixXf> &nabla_w){
+        /* void backprop(Eigen::MatrixXf &pixels, Eigen::MatrixXf &value, */ 
+        /*         std::vector<Eigen::MatrixXf> &nabla_b, std::vector<Eigen::MatrixXf> &nabla_w){ */
+        std::tuple<std::vector<Eigen::MatrixXf>, std::vector<Eigen::MatrixXf>>
+        backprop(Eigen::MatrixXf &pixels, Eigen::MatrixXf &value) {
+            
+            std::vector<Eigen::MatrixXf> nabla_b(biases_.size());
+            for (unsigned int i=0; i<nabla_b.size(); i++)
+                nabla_b[i] = Eigen::MatrixXf::Zero(biases_[i].rows(), biases_[i].cols());
+            std::vector<Eigen::MatrixXf> nabla_w(weights_.size());
+            for (unsigned int i=0; i<nabla_w.size(); i++)
+                nabla_w[i] = Eigen::MatrixXf::Zero(weights_[i].rows(), weights_[i].cols());
+            
             auto activation = pixels;
-            std::vector<Eigen::MatrixXf> activations(1,pixels);
+            std::vector<Eigen::MatrixXf> activations(1,activation);
             std::vector<Eigen::MatrixXf> zs;
 
             for (unsigned int layer=0; layer<biases_.size(); layer++) {
-                /* std::cout << "Layer " << layer << std::endl; */
-                /* std::cout << "bias[layer] =\n" << biases_[layer] << std::endl; */
-                /* std::cout << "weight[layer] =\n" << weights_[layer] << std::endl; */
-                /* std::cout << "a[layer] =\n" << activation << std::endl; */
                 auto z = weights_[layer] * activation + biases_[layer];
-                /* std::cout << "z =\n" << z << std::endl; */
                 zs.push_back(z);
                 activation = Sigmoid(z);
                 activations.push_back(activation);
@@ -161,19 +155,15 @@ class NeuralNetwork {
             delta = delta.cwiseProduct(SigmoidPrime(zs.back()));
             nabla_b.back() = delta;
             nabla_w.back() = delta * activations[activations.size()-2].transpose();
-            /* std::cout << "delta = " << delta << std::endl; */
-            /* std::cout << "nb_b =\n" << nabla_b.back() << std::endl; */
-            /* std::cout << "nw_back =\n" << nabla_w.back() << std::endl; */
 
             for (int l=2; l<num_layers_; l++) {
                 auto z = zs[zs.size() - l];
-                auto sp = SigmoidPrime(z);
                 delta = weights_[weights_.size() - l + 1].transpose() * delta;
-                delta = delta.cwiseProduct(sp);
+                delta = delta.cwiseProduct(SigmoidPrime(z));
                 nabla_b[nabla_b.size() - l] = delta;
                 nabla_w[nabla_w.size() - l] = delta * activations[activations.size() - l - 1].transpose(); 
             }
-            return;
+            return {nabla_b, nabla_w};
         }
 
         int Evaluate(std::vector<image> &test_data) {
@@ -183,11 +173,11 @@ class NeuralNetwork {
             for (unsigned int i=0; i<test_data.size(); i++) {
                 feedforward(test_data[i].pixels).maxCoeff(&maxRow, &maxCol);
                 sum += (test_data[i].value == maxRow);
-                /* std::cout << test_data[i].value << " " << maxRow */ 
-                /*     << "  = " << (test_data[i].value == maxRow) << std::endl; */
-                /* if(i>10) */
-                /*     break; */
             }
+            /* auto temp = feedforward(test_data[0].pixels);\ */
+            /* temp.maxCoeff(&maxRow, &maxCol); */
+            /* std::cout << temp.transpose() << std::endl; */
+            /* std::cout << test_data[0].value << " " << maxRow << " " << maxCol << std::endl; */
             return sum;
         }
 
