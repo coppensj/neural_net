@@ -7,7 +7,7 @@
 
 struct training_image {
     Eigen::MatrixXf pixels;
-    Eigen::Matrix<float, 10, 1> value = Eigen::MatrixXf::Zero(10,1);
+    Eigen::MatrixXf value = Eigen::MatrixXf::Zero(10,1);
 };
 
 struct image {

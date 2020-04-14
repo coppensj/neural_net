@@ -65,28 +65,25 @@ class NeuralNetwork {
             }
         }
 
-        // train the neural-network using mini-batch stochastic gradient descent
-        void SGD(std::vector<training_image> training_data, int epochs, int mini_batch_size, 
-                float eta, std::vector<image> test_data={}) {
+        // Train the neural-network using mini-batch stochastic gradient descent
+        void SGD(std::vector<training_image> training_data, int epochs, 
+                int mini_batch_size, float eta, std::vector<image> test_data={}) {
             std::random_device rd;
             std::mt19937 rng(rd());
             
             for (int i=0; i<epochs; i++) {
-                // shuffle training data
                 std::shuffle(training_data.begin(), training_data.end(), rng);
                 
-                //create and update mini_batches
+                // Create and update mini_batches
                 for (unsigned int j=0; j<training_data.size(); j+=mini_batch_size) {
                     auto k = std::min(j + mini_batch_size, (unsigned int)training_data.size());
                     UpdateMiniBatch(&training_data[0], j, k, eta);
-                    /* break; ////////////////////////// */
                 }
                 
                 if (test_data.empty())
                     printf("Epoch %d complete.\n", i);
                 else
                     printf("Epoch %d: %d / %lu\n", i, Evaluate(test_data), test_data.size());
-                /* break; ////////////////////////// */
             }
         }
 
@@ -104,22 +101,18 @@ class NeuralNetwork {
             std::vector<Eigen::MatrixXf> nabla_b(biases_.size());
             for (unsigned int i=0; i<nabla_b.size(); i++)
                 nabla_b[i] = Eigen::MatrixXf::Zero(biases_[i].rows(), biases_[i].cols());
-            /* auto delta_nabla_b(nabla_b); */
             
             std::vector<Eigen::MatrixXf> nabla_w(weights_.size());
             for (unsigned int i=0; i<nabla_w.size(); i++)
                 nabla_w[i] = Eigen::MatrixXf::Zero(weights_[i].rows(), weights_[i].cols());
-            /* auto delta_nabla_w(nabla_w); */
 
             for (int i=start; i<end; i++) {
-                /* backprop(mini_batch[i].pixels, mini_batch[i].value, delta_nabla_b, delta_nabla_w); */
-                auto [delta_nabla_b, delta_nabla_w] = backprop(mini_batch[i].pixels, mini_batch[i].value);
+                auto [delta_nabla_b, delta_nabla_w] = Backprop(mini_batch[i].pixels, mini_batch[i].value);
                 
                 for (unsigned int j=0; j<nabla_b.size(); j++)
                     nabla_b[j] += delta_nabla_b[j];
                 for (unsigned int j=0; j<nabla_w.size(); j++)
                     nabla_w[j] += delta_nabla_w[j];
-                /* break; ////////////////////////// */
             }
                
             for (unsigned int j=0; j<biases_.size(); j++) 
@@ -128,10 +121,8 @@ class NeuralNetwork {
                 weights_[j] -= (eta / mini_batch_len) * nabla_w[j];
         }
 
-        /* void backprop(Eigen::MatrixXf &pixels, Eigen::MatrixXf &value, */ 
-        /*         std::vector<Eigen::MatrixXf> &nabla_b, std::vector<Eigen::MatrixXf> &nabla_w){ */
         std::tuple<std::vector<Eigen::MatrixXf>, std::vector<Eigen::MatrixXf>>
-        backprop(Eigen::MatrixXf &pixels, Eigen::MatrixXf &value) {
+        Backprop(Eigen::MatrixXf &pixels, Eigen::MatrixXf &value) {
             
             std::vector<Eigen::MatrixXf> nabla_b(biases_.size());
             for (unsigned int i=0; i<nabla_b.size(); i++)
@@ -174,10 +165,6 @@ class NeuralNetwork {
                 feedforward(test_data[i].pixels).maxCoeff(&maxRow, &maxCol);
                 sum += (test_data[i].value == maxRow);
             }
-            /* auto temp = feedforward(test_data[0].pixels);\ */
-            /* temp.maxCoeff(&maxRow, &maxCol); */
-            /* std::cout << temp.transpose() << std::endl; */
-            /* std::cout << test_data[0].value << " " << maxRow << " " << maxCol << std::endl; */
             return sum;
         }
 

@@ -9,10 +9,10 @@
 #include <vector>       // std::vector
 #include <Eigen/Core>
 
-#include "data_types.h" // training_image and image types
+#include "data_types.h" // 'training_image' and 'image' types
 
 float** 
-read_mnist_images(std::string full_path, int& number_of_images, int& image_size) {
+ReadMnistImages(std::string full_path, int& number_of_images, int& image_size) {
     auto reverseInt = [](int i) {
         unsigned char c1, c2, c3, c4;
         c1 = i & 255, c2 = (i >> 8) & 255, c3 = (i >> 16) & 255, c4 = (i >> 24) & 255;
@@ -44,7 +44,7 @@ read_mnist_images(std::string full_path, int& number_of_images, int& image_size)
             _dataset[i] = new float[image_size];
             file.read((char *)_temp, image_size);
             for(int j=0; j<image_size; j++)
-                _dataset[i][j] = float(_temp[j]);
+                _dataset[i][j] = float(_temp[j]) / 255.0;
         }
         return _dataset;
     } else {
@@ -53,7 +53,7 @@ read_mnist_images(std::string full_path, int& number_of_images, int& image_size)
 }
 
 int* 
-read_mnist_labels(std::string full_path, int& number_of_labels) {
+ReadMnistLabels(std::string full_path, int& number_of_labels) {
     auto reverseInt = [](int i) {
         unsigned char c1, c2, c3, c4;
         c1 = i & 255, c2 = (i >> 8) & 255, c3 = (i >> 16) & 255, c4 = (i >> 24) & 255;
@@ -88,12 +88,12 @@ read_mnist_labels(std::string full_path, int& number_of_labels) {
 
 // return data types defined in 'data_types.h'
 std::tuple<std::vector<image>, std::vector<training_image>, std::vector<image>>
-load_data_wrapper(int& n_test_images, int& n_training_images, int& n_validation_images, int& image_size) {
+LoadDataWrapper(int& n_test_images, int& n_training_images, int& n_validation_images, int& image_size) {
 
-    float **test_images = read_mnist_images("../data/t10k-images-idx3-ubyte", n_test_images, image_size);
-    int    *test_labels = read_mnist_labels("../data/t10k-labels-idx1-ubyte", n_test_images);
-    float **training_images = read_mnist_images("../data/train-images-idx3-ubyte", n_training_images, image_size);
-    int    *training_labels = read_mnist_labels("../data/train-labels-idx1-ubyte", n_training_images);
+    float **test_images = ReadMnistImages("../data/t10k-images-idx3-ubyte", n_test_images, image_size);
+    int    *test_labels = ReadMnistLabels("../data/t10k-labels-idx1-ubyte", n_test_images);
+    float **training_images = ReadMnistImages("../data/train-images-idx3-ubyte", n_training_images, image_size);
+    int    *training_labels = ReadMnistLabels("../data/train-labels-idx1-ubyte", n_training_images);
     
     n_validation_images = 10000;
     n_training_images -= n_validation_images;
